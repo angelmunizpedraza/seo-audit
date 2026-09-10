@@ -1,0 +1,95 @@
+name: seo-audit
+description: Crawl a deployed site and fail the build when the deploy introduces a critical technical SEO issue.
+author: Ángel Muñiz Pedraza
+
+branding:
+  icon: alert-triangle
+  color: gray-dark
+
+inputs:
+  url:
+    description: Start URL to crawl, for example https://example.com
+    required: true
+  max-pages:
+    description: Maximum number of pages to crawl.
+    required: false
+    default: "50"
+  max-depth:
+    description: Maximum crawl depth from the start URL.
+    required: false
+    default: "3"
+  delay:
+    description: Seconds to wait between requests, so the crawl stays polite.
+    required: false
+    default: "0.3"
+  fail-on-critical:
+    description: Fail the step when the crawl finds a critical issue.
+    required: false
+    default: "true"
+  json:
+    description: Where to write the JSON report. Empty writes no JSON.
+    required: false
+    default: seo-audit.json
+  html:
+    description: Where to write the HTML report. Empty writes no HTML.
+    required: false
+    default: ""
+  python-version:
+    description: Python version used to run seo-audit.
+    required: false
+    default: "3.12"
+  ref:
+    description: Git ref of seo-audit to install. Defaults to the default branch.
+    required: false
+    default: ""
+
+outputs:
+  json:
+    description: Path to the JSON report that was written.
+    value: ${{ inputs.json }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install seo-audit
+      shell: bash
+      env:
+        SA_REF: ${{ inputs.ref }}
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+        spec="git+https://github.com/angelmunizpedraza/seo-audit"
+        if [ -n "${SA_REF}" ]; then
+          spec="${spec}@${SA_REF}"
+        fi
+        pip install "seo-audit @ ${spec}"
+
+    - name: Run seo-audit
+      shell: bash
+      env:
+        SA_URL: ${{ inputs.url }}
+        SA_PAGES: ${{ inputs.max-pages }}
+        SA_DEPTH: ${{ inputs.max-depth }}
+        SA_DELAY: ${{ inputs.delay }}
+        SA_CRIT: ${{ inputs.fail-on-critical }}
+        SA_JSON: ${{ inputs.json }}
+        SA_HTML: ${{ inputs.html }}
+      run: |
+        set -uo pipefail
+        args=("${SA_URL}" --max-pages "${SA_PAGES}" --max-depth "${SA_DEPTH}" --delay "${SA_DELAY}")
+        if [ -n "${SA_JSON}" ]; then
+          args+=(--json "${SA_JSON}")
+        fi
+        if [ -n "${SA_HTML}" ]; then
+          args+=(--html "${SA_HTML}")
+        fi
+        if [ "${SA_CRIT}" = "true" ]; then
+          args+=(--fallar-si-criticas)
+        fi
+        # Last command on purpose: its exit code becomes the step's exit code.
+        seo-audit "${args[@]}"
