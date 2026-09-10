@@ -37,10 +37,10 @@ seo-audit https://ejemplo.com
 ### Como GitHub Action
 
 Rastrea el sitio ya desplegado y tumba el build si el despliegue ha metido una
-incidencia crítica (un `noindex` accidental, un 5xx, un canonical roto):
+incidencia crítica (un `noindex` accidental, un canonical roto, un 5xx):
 
 ```yaml
-- uses: angelmunizpedraza/seo-audit@main
+- uses: angelmunizpedraza/seo-audit@v1
   with:
     url: https://ejemplo.com
     max-pages: "100"
