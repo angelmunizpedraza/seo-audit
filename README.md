@@ -1,5 +1,9 @@
 # seo-audit
 
+[![CI](https://github.com/angelmunizpedraza/seo-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/angelmunizpedraza/seo-audit/actions)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 Auditoría SEO técnica desde línea de comandos. Rastrea un sitio y devuelve las
 incidencias que afectan a indexación, contenido, rendimiento y datos estructurados,
 ordenadas por gravedad.
