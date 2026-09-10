@@ -15,16 +15,42 @@ empezar.
 ## Instalación
 
 ```bash
+pip install "seo-audit @ git+https://github.com/angelmunizpedraza/seo-audit"
+```
+
+O para trabajar sobre el código:
+
+```bash
 git clone https://github.com/angelmunizpedraza/seo-audit
 cd seo-audit
-pip install -r requirements.txt
+pip install -e ".[dev]"
 ```
 
 ## Uso
 
 ```bash
-python -m seo_audit https://ejemplo.com
+seo-audit https://ejemplo.com
 ```
+
+(`python -m seo_audit` sigue funcionando igual.)
+
+### Como GitHub Action
+
+Rastrea el sitio ya desplegado y tumba el build si el despliegue ha metido una
+incidencia crítica (un `noindex` accidental, un 5xx, un canonical roto):
+
+```yaml
+- uses: angelmunizpedraza/seo-audit@main
+  with:
+    url: https://ejemplo.com
+    max-pages: "100"
+    fail-on-critical: "true"
+```
+
+Entradas: `url`, `max-pages` (50), `max-depth` (3), `delay` (0.3),
+`fail-on-critical` (true), `json` (seo-audit.json), `html`, `python-version` (3.12)
+y `ref`. La CI de este repositorio ejecuta la propia action contra un sitio real en
+cada push.
 
 Con informe en HTML y más páginas:
 
