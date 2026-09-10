@@ -21,8 +21,22 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -r requirements.txt pytest
       - name: Tests
         run: pytest -q
-      - name: The console script must exist
-        run: seo-audit --help
+
+  action:
+    name: The action must run against a real site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run this repository's own action
+        uses: ./
+        with:
+          url: https://example.com
+          max-pages: "3"
+          max-depth: "1"
+          fail-on-critical: "false"
+          json: example-com.json
+      - name: The report must exist
+        run: test -s example-com.json
